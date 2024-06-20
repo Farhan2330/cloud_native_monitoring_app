@@ -23,7 +23,3 @@ Clone the repository from GitHub:
 ```bash
 git clone <repository_url>
 cd <repository_name>
-
-
-
-
