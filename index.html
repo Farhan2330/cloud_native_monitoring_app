@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Monitoring</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap');
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212; /* Darker background color */
+            color: #ffffff; /* White text color */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            text-align: center;
+            background-color: #1f1f1f; /* Slightly lighter background */
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 800px;
+            margin: auto;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #FF6F61; /* Coral color for heading */
+            font-family: 'Roboto Slab', serif; /* New font for heading */
+            font-size: 2.5em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+        }
+        .plotly-graph-div {
+            margin: 20px auto;
+            width: 100%;
+            max-width: 600px;
+            background-color: #121212; /* Dark background for graphs */
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .alert {
+            margin-top: 20px;
+            padding: 10px;
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+        }
+        @media (max-width: 600px) {
+            .plotly-graph-div {
+                width: 100%;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>System Monitoring</h1>
+        <div id="cpu-gauge" class="plotly-graph-div"></div>
+        <div id="mem-gauge" class="plotly-graph-div"></div>
+        {% if message %}
+        <div class="alert alert-danger">{{ message }}</div>
+        {% endif %}
+    </div>
+    <script>
+        var cpuMetric = {{ cpu_metric }};
+        var memMetric = {{ mem_metric }};
+        
+        var cpuGauge = {
+            type: "indicator",
+            mode: "gauge+number",
+            value: cpuMetric,
+            gauge: {
+                axis: { range: [null, 100] },
+                bar: { color: "#00BCD4" }, /* Bar color for CPU gauge */
+                bgcolor: "#1f1f1f",
+                borderwidth: 2,
+                bordercolor: "#ccc",
+                steps: [
+                    { range: [0, 50], color: "#6b705c" },
+                    { range: [50, 85], color: "#f4d03f" },
+                    { range: [85, 100], color: "#ff5733" }
+                ],
+                threshold: {
+                    line: { color: "#ff0000", width: 1 }, /* Thinner threshold line */
+                    thickness: 0.3, /* Thinner threshold thickness */
+                    value: cpuMetric
+                }
+            }
+        };
+        
+        var memGauge = {
+            type: "indicator",
+            mode: "gauge+number",
+            value: memMetric,
+            gauge: {
+                axis: { range: [null, 100] },
+                bar: { color: "#8A2BE2" }, /* Violet bar color for Memory gauge */
+                bgcolor: "#1f1f1f",
+                borderwidth: 2,
+                bordercolor: "#ccc",
+                steps: [
+                    { range: [0, 50], color: "#6b705c" }, /* Thistle */
+                    { range: [50, 85], color: "#f4d03f" }, /* Orchid */
+                    { range: [85, 100], color: "#ff5733" } /* BlueViolet */
+                ],
+                threshold: {
+                    line: { color: "#ff0000", width: 1 }, /* Thinner threshold line */
+                    thickness: 0.3, /* Thinner threshold thickness */
+                    value: memMetric
+                }
+            }
+        };
+        
+        var cpuGaugeLayout = { 
+            title: "CPU Utilization",
+            font: { color: "#ffffff" }, /* Font color for layout */
+            paper_bgcolor: "#121212",
+            plot_bgcolor: "#121212",
+            responsive: true
+        };
+        var memGaugeLayout = { 
+            title: "Memory Utilization",
+            font: { color: "#ffffff" }, /* Font color for layout */
+            paper_bgcolor: "#121212",
+            plot_bgcolor: "#121212",
+            responsive: true  
+        };
+        
+        Plotly.newPlot('cpu-gauge', [cpuGauge], cpuGaugeLayout);
+        Plotly.newPlot('mem-gauge', [memGauge], memGaugeLayout);
+        
+        window.onresize = function() {
+            Plotly.Plots.resize(document.getElementById('cpu-gauge'));
+            Plotly.Plots.resize(document.getElementById('mem-gauge'));
+        };
+    </script>
+</body>
+</html>
